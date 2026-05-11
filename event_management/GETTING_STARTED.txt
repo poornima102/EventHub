@@ -1,0 +1,257 @@
+================================================================================
+EVENT MANAGEMENT SYSTEM - GETTING STARTED (5 MINUTES)
+================================================================================
+
+This quick start guide will get you running in 5 minutes!
+
+================================================================================
+WHAT YOU'LL NEED
+================================================================================
+
+1. Python 3.9 or higher - Download from python.org
+2. MySQL 8.0 or higher - Download from mysql.com
+3. This project folder
+
+================================================================================
+STEP-BY-STEP (5 MINUTES)
+================================================================================
+
+STEP 1: Open Terminal/Command Prompt (2 minutes)
+--------
+Navigate to the event_management folder
+
+On Windows:
+  - Open Command Prompt
+  - cd C:\ai project\event_management
+
+On macOS/Linux:
+  - Open Terminal
+  - cd ~/path/to/event_management
+
+
+STEP 2: Quick Setup (2 minutes)
+--------
+
+Option A: Automatic (Windows)
+  - Double-click run_server.bat
+  - This automatically handles everything!
+  - Watch for "Starting development server..."
+
+Option B: Automatic (macOS/Linux)
+  - chmod +x run_server.sh
+  - ./run_server.sh
+  - Watch for "Development Server Starting..."
+
+Option C: Manual
+  
+  a) Create and activate virtual environment:
+     python -m venv venv
+     venv\Scripts\activate  (Windows)
+     source venv/bin/activate  (macOS/Linux)
+
+  b) Install packages:
+     pip install -r requirements.txt
+
+  c) Create database (in MySQL command line):
+     CREATE DATABASE event_management_db;
+
+  d) Run migrations:
+     python manage.py migrate
+
+  e) Start server:
+     python manage.py runserver
+
+
+STEP 3: Test It! (1 minute)
+--------
+
+Open a new Terminal/Command Prompt and run:
+
+  python test_api.py
+
+Watch it test all 12 endpoints - all should show ✓ PASSED!
+
+
+STEP 4: Use the API (Access in browser/Postman)
+--------
+
+Server URL: http://localhost:8000/api
+Admin URL: http://localhost:8000/admin (if you created superuser)
+
+Try these in browser:
+  - http://localhost:8000/api/events/
+  
+Or use Postman:
+  - Import: EventManagementAPI.postman_collection.json
+  - Replace YOUR_TOKEN with actual token from register
+
+
+================================================================================
+FIRST API TEST (30 SECONDS)
+================================================================================
+
+Open a new terminal and run:
+
+  curl -X POST http://localhost:8000/api/auth/register/ \
+    -H "Content-Type: application/json" \
+    -d '{
+      "full_name": "Test User",
+      "email": "test@example.com",
+      "password": "testpass123"
+    }'
+
+You should see a success response with a token!
+
+Copy your token and run:
+
+  curl -H "Authorization: Token YOUR_TOKEN" \
+    http://localhost:8000/api/events/
+
+Success! You're using the API!
+
+
+================================================================================
+WHAT'S RUNNING?
+================================================================================
+
+✅ Complete Event Management API
+✅ User Registration and Login
+✅ Event Creation and Management
+✅ Event Registration System
+✅ Seat Management with Overbooking Prevention
+✅ Permission-Based Access Control
+✅ Token-Based Authentication
+✅ MySQL Database
+✅ Admin Panel
+✅ 16 API Endpoints
+
+
+================================================================================
+NEXT STEPS
+================================================================================
+
+1. Read README.md for complete API documentation
+2. Read API_EXAMPLES.md for usage examples
+3. Read setup-guide.txt for detailed configuration
+4. Try creating an event:
+   
+   curl -X POST http://localhost:8000/api/events/ \
+     -H "Authorization: Token YOUR_TOKEN" \
+     -H "Content-Type: application/json" \
+     -d '{
+       "title": "My First Event",
+       "description": "This is awesome!",
+       "venue": "Downtown",
+       "event_date": "2024-12-25",
+       "event_time": "10:00:00",
+       "total_seats": 50,
+       "available_seats": 50,
+       "ticket_price": "99.99"
+     }'
+
+5. Test all endpoints using provided Postman collection
+
+
+================================================================================
+TROUBLESHOOTING
+================================================================================
+
+"ModuleNotFoundError: No module named 'django'"
+  → Run: pip install -r requirements.txt
+
+"Can't connect to MySQL"
+  → Make sure MySQL is running
+  → Check credentials in settings.py
+  → Run: CREATE DATABASE event_management_db;
+
+"'Token not found' error"
+  → Make sure you have a valid token from register/login
+  → Add it to Authorization header: Authorization: Token YOUR_TOKEN
+
+"Migration errors"
+  → Run: python manage.py migrate
+
+"Port 8000 already in use"
+  → Run: python manage.py runserver 8001 (use different port)
+
+
+================================================================================
+KEY URLS
+================================================================================
+
+API Root:                 http://localhost:8000/api
+Django Admin:             http://localhost:8000/admin
+Register:                 POST /api/auth/register/
+Login:                    POST /api/auth/login/
+List Events:              GET /api/events/
+Create Event:             POST /api/events/
+Register for Event:       POST /api/events/<id>/register/
+My Registrations:         GET /api/my-registrations/
+My Events:                GET /api/my-events/
+
+
+================================================================================
+FILES YOU NEED TO KNOW ABOUT
+================================================================================
+
+📘 README.md               - Full API documentation (READ THIS FIRST!)
+📘 API_EXAMPLES.md         - Detailed examples of all endpoints
+📘 setup-guide.txt         - Step-by-step setup with troubleshooting
+📘 DATABASE_SCHEMA.md      - Database tables and relationships
+📘 PROJECT_SUMMARY.md      - Project overview and features
+🔧 settings.py             - Django configuration (MySQL, DRF setup)
+🔧 run_server.bat/sh       - Automatic startup scripts
+🧪 test_api.py             - Test all 12 endpoints
+📋 requirements.txt        - All Python dependencies
+🎯 EventManagementAPI.postman_collection.json  - Postman testing
+
+
+================================================================================
+PRODUCTION DEPLOYMENT
+================================================================================
+
+When ready to deploy:
+
+1. Read: setup-guide.txt (Production Deployment section)
+2. Read: PROJECT_SUMMARY.md (Production Deployment Checklist)
+3. Change: DEBUG=False in settings.py
+4. Change: SECRET_KEY in settings.py
+5. Set up: ALLOWED_HOSTS
+6. Use: Gunicorn + Nginx
+7. Setup: SSL/TLS certificate
+
+
+================================================================================
+QUICK REFERENCE
+================================================================================
+
+Start server:
+  - Windows: run_server.bat
+  - macOS/Linux: ./run_server.sh
+  - Manual: python manage.py runserver
+
+Test API:
+  - python test_api.py
+
+Stop server:
+  - Press Ctrl+C
+
+View admin:
+  - Go to http://localhost:8000/admin
+  - (Only if you created superuser: python manage.py createsuperuser)
+
+
+================================================================================
+YOU'RE READY!
+================================================================================
+
+Your Event Management System is now set up and running! 🚀
+
+For questions or issues, check:
+1. setup-guide.txt (TROUBLESHOOTING section)
+2. README.md (Common issues)
+3. API_EXAMPLES.md (How to use)
+
+Happy coding!
+
+================================================================================
