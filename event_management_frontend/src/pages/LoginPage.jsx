@@ -57,20 +57,27 @@ const LoginPage = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary-50 to-primary-100 py-12 px-4">
-      <div className="max-w-md w-full bg-white rounded-lg shadow-lg p-8">
+    <div className="min-h-screen flex items-center justify-center bg-slate-950 text-white py-12 px-4">
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,_rgba(56,189,248,0.16),_transparent_26%),radial-gradient(circle_at_bottom_right,_rgba(168,85,247,0.18),_transparent_28%)] pointer-events-none"></div>
+      <div className="relative max-w-md w-full bg-slate-900/95 border border-slate-800 shadow-2xl shadow-slate-950/30 rounded-3xl p-8 backdrop-blur-md">
         {/* Header */}
         <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">EventHub</h1>
-          <h2 className="text-2xl font-bold text-gray-800">Login</h2>
-          <p className="text-gray-600 mt-2">Sign in to your account</p>
+          <div className="inline-flex items-center gap-2 rounded-full bg-primary-600/10 text-primary-200 px-3 py-1 text-xs font-semibold uppercase tracking-[0.08em] mb-4">
+            EventHub
+          </div>
+          <h1 className="text-3xl font-bold tracking-tight text-white mb-2">EventHub</h1>
+          <p className="text-slate-300 text-sm leading-6">
+            Sign in to your account to manage events, attendees, and registrations.
+          </p>
         </div>
+
+        <div className="mb-6" />
 
         {/* Form */}
         <form onSubmit={handleSubmit} className="space-y-6">
           {/* Email Field */}
           <div>
-            <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
+            <label htmlFor="email" className="block text-sm font-medium text-slate-200 mb-1">
               Email Address
             </label>
             <input
@@ -79,20 +86,20 @@ const LoginPage = () => {
               name="email"
               value={formData.email}
               onChange={handleChange}
-              className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 ${
-                errors.email ? 'border-red-500' : 'border-gray-300'
+              className={`w-full px-4 py-3 border rounded-3xl bg-slate-950 text-white focus:outline-none focus:ring-2 focus:ring-cyan-500 ${
+                errors.email ? 'border-red-500' : 'border-slate-700'
               }`}
-              placeholder="you@example.com"
+              placeholder="you@domain.com"
               disabled={loading}
             />
             {errors.email && (
-              <p className="text-red-500 text-sm mt-1">{errors.email}</p>
+              <p className="text-red-400 text-sm mt-1">{errors.email}</p>
             )}
           </div>
 
           {/* Password Field */}
           <div>
-            <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
+            <label htmlFor="password" className="block text-sm font-medium text-slate-200 mb-1">
               Password
             </label>
             <input
@@ -101,14 +108,14 @@ const LoginPage = () => {
               name="password"
               value={formData.password}
               onChange={handleChange}
-              className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 ${
-                errors.password ? 'border-red-500' : 'border-gray-300'
+              className={`w-full px-4 py-3 border rounded-3xl bg-slate-950 text-white focus:outline-none focus:ring-2 focus:ring-cyan-500 ${
+                errors.password ? 'border-red-500' : 'border-slate-700'
               }`}
-              placeholder="••••••••"
+              placeholder="Enter your password"
               disabled={loading}
             />
             {errors.password && (
-              <p className="text-red-500 text-sm mt-1">{errors.password}</p>
+              <p className="text-red-400 text-sm mt-1">{errors.password}</p>
             )}
           </div>
 
@@ -116,18 +123,18 @@ const LoginPage = () => {
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-primary-600 text-white py-2 px-4 rounded-lg font-medium hover:bg-primary-700 transition disabled:opacity-50 disabled:cursor-not-allowed"
+            className="w-full bg-gradient-to-r from-cyan-500 to-violet-500 text-white py-3 rounded-3xl font-semibold shadow-lg shadow-cyan-500/20 hover:from-cyan-400 hover:to-violet-600 transition disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {loading ? 'Logging in...' : 'Login'}
+            {loading ? 'Authenticating...' : 'Sign in'}
           </button>
         </form>
 
         {/* Register Link */}
-        <div className="mt-6 text-center">
-          <p className="text-gray-600">
-            Don't have an account?{' '}
-            <Link to="/register" className="text-primary-600 font-medium hover:underline">
-              Register here
+        <div className="mt-6 text-center border-t border-slate-800 pt-5">
+          <p className="text-slate-400 text-sm">
+            New to EventHub?{' '}
+            <Link to="/register" className="text-cyan-300 font-semibold hover:underline">
+              Create an account
             </Link>
           </p>
         </div>

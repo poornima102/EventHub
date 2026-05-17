@@ -14,9 +14,9 @@ const API_TIMEOUT = process.env.REACT_APP_API_TIMEOUT || 10000;
 const apiClient = axios.create({
   baseURL: API_BASE_URL,
   timeout: parseInt(API_TIMEOUT),
-  headers: {
-    'Content-Type': 'application/json',
-  },
+  // Do not set a global Content-Type header here so multipart/form-data
+  // requests (FormData) can be sent with the browser-managed boundary.
+  headers: {},
 });
 
 /**
@@ -30,6 +30,15 @@ apiClient.interceptors.request.use(
     // Add authorization header if token exists
     if (token) {
       config.headers.Authorization = `Token ${token}`;
+    }
+    // If sending FormData, remove Content-Type so browser sets multipart boundary
+    if (config.data instanceof FormData) {
+      if (config.headers['Content-Type']) {
+        delete config.headers['Content-Type'];
+      }
+      if (config.headers.common && config.headers.common['Content-Type']) {
+        delete config.headers.common['Content-Type'];
+      }
     }
     
     return config;

@@ -4,6 +4,19 @@
  */
 import apiClient from './api';
 
+const unwrapResponse = (response) => {
+  if (!response || !response.data) {
+    return response;
+  }
+
+  // If API wraps payload in { success, message, data: {...}} return the internal data
+  if (response.data.data !== undefined) {
+    return response.data.data;
+  }
+
+  return response.data;
+};
+
 const eventService = {
   /**
    * Get all events (upcoming events)
@@ -13,7 +26,7 @@ const eventService = {
   getEvents: async (params = {}) => {
     try {
       const response = await apiClient.get('/events/', { params });
-      return response.data;
+      return unwrapResponse(response);
     } catch (error) {
       throw error.response?.data || error.message;
     }
@@ -27,7 +40,7 @@ const eventService = {
   getEventDetails: async (eventId) => {
     try {
       const response = await apiClient.get(`/events/${eventId}/`);
-      return response.data;
+      return unwrapResponse(response);
     } catch (error) {
       throw error.response?.data || error.message;
     }
@@ -40,8 +53,10 @@ const eventService = {
    */
   createEvent: async (eventData) => {
     try {
-      const response = await apiClient.post('/events/', eventData);
-      return response.data;
+      // If eventData is FormData, axios will set Content-Type: multipart/form-data automatically
+      const config = eventData instanceof FormData ? {} : {};
+      const response = await apiClient.post('/events/', eventData, config);
+      return unwrapResponse(response);
     } catch (error) {
       throw error.response?.data || error.message;
     }
@@ -56,7 +71,7 @@ const eventService = {
   updateEvent: async (eventId, eventData) => {
     try {
       const response = await apiClient.put(`/events/${eventId}/`, eventData);
-      return response.data;
+      return unwrapResponse(response);
     } catch (error) {
       throw error.response?.data || error.message;
     }
@@ -71,7 +86,7 @@ const eventService = {
   patchEvent: async (eventId, eventData) => {
     try {
       const response = await apiClient.patch(`/events/${eventId}/`, eventData);
-      return response.data;
+      return unwrapResponse(response);
     } catch (error) {
       throw error.response?.data || error.message;
     }
@@ -85,7 +100,7 @@ const eventService = {
   deleteEvent: async (eventId) => {
     try {
       const response = await apiClient.delete(`/events/${eventId}/`);
-      return response.data;
+      return unwrapResponse(response);
     } catch (error) {
       throw error.response?.data || error.message;
     }
@@ -100,7 +115,7 @@ const eventService = {
   registerForEvent: async (eventId, registrationData) => {
     try {
       const response = await apiClient.post(`/events/${eventId}/register/`, registrationData);
-      return response.data;
+      return unwrapResponse(response);
     } catch (error) {
       throw error.response?.data || error.message;
     }
@@ -114,7 +129,7 @@ const eventService = {
   getMyRegistrations: async (params = {}) => {
     try {
       const response = await apiClient.get('/my-registrations/', { params });
-      return response.data;
+      return unwrapResponse(response);
     } catch (error) {
       throw error.response?.data || error.message;
     }
@@ -128,7 +143,7 @@ const eventService = {
   getMyEvents: async (params = {}) => {
     try {
       const response = await apiClient.get('/my-events/', { params });
-      return response.data;
+      return unwrapResponse(response);
     } catch (error) {
       throw error.response?.data || error.message;
     }
@@ -143,7 +158,7 @@ const eventService = {
   getEventRegistrations: async (eventId, params = {}) => {
     try {
       const response = await apiClient.get(`/events/${eventId}/registrations/`, { params });
-      return response.data;
+      return unwrapResponse(response);
     } catch (error) {
       throw error.response?.data || error.message;
     }
@@ -157,7 +172,7 @@ const eventService = {
   cancelRegistration: async (registrationId) => {
     try {
       const response = await apiClient.post(`/registrations/${registrationId}/cancel/`);
-      return response.data;
+      return unwrapResponse(response);
     } catch (error) {
       throw error.response?.data || error.message;
     }

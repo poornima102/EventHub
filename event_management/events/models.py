@@ -32,6 +32,8 @@ class Event(models.Model):
     title = models.CharField(max_length=255)
     description = models.TextField()
     venue = models.CharField(max_length=255)
+    category = models.CharField(max_length=100, blank=True, default='')
+    banner_image = models.ImageField(upload_to='event_banners/', blank=True, null=True)
     event_date = models.DateField()
     event_time = models.TimeField()
     total_seats = models.PositiveIntegerField()

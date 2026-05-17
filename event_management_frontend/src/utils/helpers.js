@@ -8,8 +8,11 @@ const helpers = {
    * Format date to readable format
    */
   formatDate: (dateString) => {
+    if (!dateString) return 'N/A';
+    const date = new Date(dateString);
+    if (Number.isNaN(date.getTime())) return 'N/A';
     const options = { year: 'numeric', month: 'long', day: 'numeric' };
-    return new Date(dateString).toLocaleDateString('en-US', options);
+    return date.toLocaleDateString('en-US', options);
   },
 
   /**
@@ -27,10 +30,14 @@ const helpers = {
   /**
    * Format currency
    */
-  formatCurrency: (amount) => {
-    return new Intl.NumberFormat('en-US', {
+  formatCurrency: (amount, currency = 'INR') => {
+    if (amount === null || amount === undefined || amount === '') {
+      return '';
+    }
+    return new Intl.NumberFormat('en-IN', {
       style: 'currency',
-      currency: 'USD',
+      currency,
+      maximumFractionDigits: 2,
     }).format(amount);
   },
 

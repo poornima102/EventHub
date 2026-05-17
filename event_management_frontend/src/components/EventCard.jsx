@@ -5,19 +5,35 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import helpers from '../utils/helpers';
+import toastUtils from '../utils/toast';
 
 const EventCard = ({ event, showActions = false, onEdit = null, onDelete = null }) => {
-  const availableSeats = event.total_seats - event.seats_booked;
+  const availableSeats = event.available_seats ?? 0;
   const isFullyBooked = availableSeats <= 0;
 
   const handleDelete = async () => {
-    if (window.confirm('Are you sure you want to delete this event?')) {
+    const confirmed = await toastUtils.confirm(
+      'Delete this event? This action cannot be undone. Are you sure you want to permanently remove this event from your dashboard?'
+    );
+    if (confirmed && onDelete) {
       onDelete(event.id);
     }
   };
 
   return (
     <div className="bg-white rounded-lg shadow-md hover:shadow-lg transition overflow-hidden">
+      {event.banner_image ? (
+        <img
+          src={event.banner_image}
+          alt={event.title}
+          className="h-48 w-full object-cover"
+        />
+      ) : (
+        <div className="h-48 w-full bg-gray-100 flex items-center justify-center text-gray-400 text-sm">
+          No Image Available
+        </div>
+      )}
+
       {/* Header with date badge */}
       <div className="bg-gradient-to-r from-primary-500 to-primary-600 p-4 text-white">
         <div className="flex justify-between items-start">
@@ -41,24 +57,39 @@ const EventCard = ({ event, showActions = false, onEdit = null, onDelete = null 
         {/* Details Row */}
         <div className="grid grid-cols-2 gap-4 mb-4">
           <div>
+            <p className="text-gray-500 text-xs uppercase">Category</p>
+            <p className="text-lg font-bold text-gray-900">{event.category || 'General'}</p>
+          </div>
+          <div>
+            <p className="text-gray-500 text-xs uppercase">Status</p>
+            <p className="text-lg font-bold text-primary-600">{event.event_status || 'Upcoming'}</p>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-2 gap-4 mb-4">
+          <div>
+            <p className="text-gray-500 text-xs uppercase">Registrations</p>
+            <p className="text-lg font-bold text-gray-900">{event.total_registrations ?? 0}</p>
+          </div>
+          <div>
             <p className="text-gray-500 text-xs uppercase">Available Seats</p>
             <p className={`text-lg font-bold ${isFullyBooked ? 'text-red-500' : 'text-green-500'}`}>
               {isFullyBooked ? 'Fully Booked' : availableSeats}
             </p>
           </div>
+        </div>
+
+        <div className="grid grid-cols-2 gap-4 mb-4">
           <div>
             <p className="text-gray-500 text-xs uppercase">Ticket Price</p>
             <p className="text-lg font-bold text-primary-600">
               {helpers.formatCurrency(event.ticket_price)}
             </p>
           </div>
-        </div>
-
-        {/* Time Remaining */}
-        <div className="mb-4 p-3 bg-blue-50 rounded">
-          <p className="text-sm text-blue-700">
-            ⏰ {helpers.getTimeRemaining(event.event_date)}
-          </p>
+          <div>
+            <p className="text-gray-500 text-xs uppercase">Time Remaining</p>
+            <p className="text-lg font-bold text-blue-700">{helpers.getTimeRemaining(event.event_date)}</p>
+          </div>
         </div>
 
         {/* Actions */}

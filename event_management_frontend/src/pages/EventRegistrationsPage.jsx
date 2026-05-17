@@ -10,6 +10,19 @@ import eventService from '../services/eventService';
 import toastUtils from '../utils/toast';
 import helpers from '../utils/helpers';
 
+const getFormattedStatus = (status) => {
+  const normalizedStatus = typeof status === 'string' ? status.trim().toLowerCase() : '';
+  if (!normalizedStatus) return 'Unknown';
+  return normalizedStatus.charAt(0).toUpperCase() + normalizedStatus.slice(1);
+};
+
+const getStatusClasses = (status) => {
+  const normalizedStatus = typeof status === 'string' ? status.trim().toLowerCase() : '';
+  if (normalizedStatus === 'confirmed') return 'bg-green-100 text-green-800';
+  if (normalizedStatus === 'cancelled') return 'bg-red-100 text-red-800';
+  return 'bg-yellow-100 text-yellow-800';
+};
+
 const EventRegistrationsPage = () => {
   const { id } = useParams();
   const [event, setEvent] = useState(null);
@@ -136,34 +149,28 @@ const EventRegistrationsPage = () => {
                   <tr key={registration.id} className="hover:bg-gray-50">
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="text-sm font-medium text-gray-900">
-                        {registration.user.full_name}
+                        {registration.user?.full_name || 'Guest'}
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm text-gray-900">{registration.user.email}</div>
+                      <div className="text-sm text-gray-900">{registration.user?.email || 'N/A'}</div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm text-gray-900">{registration.seats_reserved}</div>
+                      <div className="text-sm text-gray-900">{registration.seats_reserved ?? '—'}</div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="text-sm text-gray-900">
-                        {helpers.formatCurrency(registration.total_cost)}
+                        {helpers.formatCurrency(registration.total_cost ?? 0)}
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="text-sm text-gray-900">
-                        {helpers.formatDate(registration.registration_date)}
+                        {helpers.formatDate(registration.registered_at)}
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-                        registration.status === 'confirmed'
-                          ? 'bg-green-100 text-green-800'
-                          : registration.status === 'cancelled'
-                          ? 'bg-red-100 text-red-800'
-                          : 'bg-yellow-100 text-yellow-800'
-                      }`}>
-                        {registration.status.charAt(0).toUpperCase() + registration.status.slice(1)}
+                      <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getStatusClasses(registration.registration_status)}`}>
+                        {getFormattedStatus(registration.registration_status)}
                       </span>
                     </td>
                   </tr>

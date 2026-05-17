@@ -54,9 +54,8 @@ const EventDetailsPage = () => {
     try {
       await eventService.registerForEvent(id, { seats_reserved: parseInt(seatsReserved) });
       toastUtils.success('Registration successful!');
-      // Refresh event details to update available seats
-      await fetchEventDetails();
       setSeatsReserved(1);
+      navigate('/my-registrations');
     } catch (err) {
       setRegistrationError(toastUtils.getErrorMessage(err));
     } finally {
@@ -87,7 +86,7 @@ const EventDetailsPage = () => {
     );
   }
 
-  const availableSeats = event.total_seats - event.seats_booked;
+  const availableSeats = event.available_seats ?? 0;
   const isFullyBooked = availableSeats <= 0;
   const isPastEvent = new Date(event.event_date) < new Date();
 

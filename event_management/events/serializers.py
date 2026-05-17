@@ -119,12 +119,13 @@ class EventSerializer(serializers.ModelSerializer):
     event_datetime = serializers.SerializerMethodField()
     is_event_owner = serializers.SerializerMethodField()
     seats_available = serializers.IntegerField(source='available_seats', read_only=True)
+    event_status = serializers.SerializerMethodField()
     
     class Meta:
         model = Event
         fields = [
-            'id', 'created_by', 'title', 'description', 'venue', 
-            'event_date', 'event_time', 'event_datetime', 'total_seats', 
+            'id', 'created_by', 'title', 'description', 'venue', 'category', 'banner_image',
+            'event_date', 'event_time', 'event_datetime', 'event_status', 'total_seats', 
             'available_seats', 'seats_available', 'ticket_price', 
             'created_at', 'updated_at', 'is_event_owner'
         ]
@@ -185,6 +186,16 @@ class EventSerializer(serializers.ModelSerializer):
         Combine event_date and event_time
         """
         return f"{obj.event_date} {obj.event_time}"
+
+    def get_event_status(self, obj):
+        """
+        Get a human-readable event status
+        """
+        if obj.event_date < timezone.now().date():
+            return 'Completed'
+        if obj.available_seats <= 0:
+            return 'Fully Booked'
+        return 'Upcoming'
     
     def get_is_event_owner(self, obj):
         """
@@ -206,13 +217,20 @@ class RegistrationSerializer(serializers.ModelSerializer):
     event_title = serializers.CharField(source='event.title', read_only=True)
     event_date = serializers.DateField(source='event.event_date', read_only=True)
     event_time = serializers.TimeField(source='event.event_time', read_only=True)
+    event_venue = serializers.CharField(source='event.venue', read_only=True)
+    # Use ImageField so DRF returns a URL (requires request in serializer context)
+    event_banner = serializers.ImageField(source='event.banner_image', read_only=True, use_url=True)
+    event_category = serializers.CharField(source='event.category', read_only=True)
+    event_status = serializers.SerializerMethodField()
+    payment_status = serializers.SerializerMethodField()
     total_cost = serializers.SerializerMethodField()
     
     class Meta:
         model = Registration
         fields = [
             'id', 'user', 'event', 'event_title', 'event_date', 'event_time',
-            'seats_reserved', 'registration_status', 'registered_at', 'total_cost'
+            'event_venue', 'event_banner', 'event_category', 'event_status',
+            'seats_reserved', 'registration_status', 'payment_status', 'registered_at', 'total_cost'
         ]
         read_only_fields = ['id', 'user', 'event', 'registration_status', 'registered_at']
     
@@ -241,6 +259,26 @@ class RegistrationSerializer(serializers.ModelSerializer):
         
         return attrs
     
+    def get_event_status(self, obj):
+        """
+        Get a human-readable status for the registered event
+        """
+        if obj.event.event_date < timezone.now().date():
+            return 'Completed'
+        if obj.event.available_seats <= 0:
+            return 'Fully Booked'
+        return 'Upcoming'
+
+    def get_payment_status(self, obj):
+        """
+        Determine the payment status for the registration
+        """
+        if obj.registration_status == 'CONFIRMED':
+            return 'Paid'
+        if obj.registration_status == 'CANCELLED':
+            return 'Cancelled'
+        return 'Pending'
+
     def get_total_cost(self, obj):
         """
         Calculate total cost (seats reserved * ticket price)

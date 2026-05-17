@@ -3,8 +3,11 @@ Django REST Framework Views for Event Management System
 Implements API endpoints for authentication, events, and registrations
 """
 from rest_framework import status, viewsets, generics
-from rest_framework.decorators import api_view, permission_classes
+from rest_framework.decorators import api_view, permission_classes, parser_classes
+from rest_framework.parsers import JSONParser, FormParser, MultiPartParser
 from rest_framework.response import Response
+import logging
+import json
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.authtoken.models import Token
 from rest_framework.pagination import PageNumberPagination
@@ -60,10 +63,15 @@ def api_response(success, message, data=None, status_code=None):
     return Response(response_data, status=status_code)
 
 
+# Logger for auth debugging
+logger = logging.getLogger(__name__)
+
+
 # ==================== AUTHENTICATION VIEWS ====================
 
 @api_view(['POST'])
 @permission_classes([AllowAny])
+@parser_classes([JSONParser, FormParser, MultiPartParser])
 def register_user(request):
     """
     User Registration Endpoint
@@ -87,6 +95,22 @@ def register_user(request):
         }
     }
     """
+    # Log request metadata for debugging (mask sensitive fields)
+    try:
+        logger.debug('Register request content_type=%s content_length=%s', request.content_type, request.META.get('CONTENT_LENGTH'))
+        raw = request.body.decode('utf-8') if request.body else ''
+        preview = {}
+        if raw:
+            try:
+                preview = json.loads(raw)
+                if isinstance(preview, dict) and 'password' in preview:
+                    preview['password'] = '***'
+            except Exception:
+                preview = {'raw_length': len(raw)}
+        logger.debug('Register request body preview=%s', list(preview.keys()) if isinstance(preview, dict) else preview)
+    except Exception as e:
+        logger.debug('Failed to log register request: %s', e)
+
     serializer = UserRegistrationSerializer(data=request.data)
     
     if serializer.is_valid():
@@ -114,6 +138,8 @@ def register_user(request):
                 status_code=status.HTTP_400_BAD_REQUEST
             )
     
+    # Log validation errors for debugging
+    logger.debug('Register validation failed: %s', serializer.errors)
     return api_response(
         success=False,
         message='Validation error',
@@ -124,6 +150,7 @@ def register_user(request):
 
 @api_view(['POST'])
 @permission_classes([AllowAny])
+@parser_classes([JSONParser, FormParser, MultiPartParser])
 def login_user(request):
     """
     User Login Endpoint
@@ -146,6 +173,22 @@ def login_user(request):
         }
     }
     """
+    # Log request metadata for debugging (mask sensitive fields)
+    try:
+        logger.debug('Login request content_type=%s content_length=%s', request.content_type, request.META.get('CONTENT_LENGTH'))
+        raw = request.body.decode('utf-8') if request.body else ''
+        preview = {}
+        if raw:
+            try:
+                preview = json.loads(raw)
+                if isinstance(preview, dict) and 'password' in preview:
+                    preview['password'] = '***'
+            except Exception:
+                preview = {'raw_length': len(raw)}
+        logger.debug('Login request body preview=%s', list(preview.keys()) if isinstance(preview, dict) else preview)
+    except Exception as e:
+        logger.debug('Failed to log login request: %s', e)
+
     serializer = UserLoginSerializer(data=request.data)
     
     if serializer.is_valid():
@@ -166,6 +209,8 @@ def login_user(request):
             status_code=status.HTTP_200_OK
         )
     
+    # Log validation errors for debugging
+    logger.debug('Login validation failed: %s', serializer.errors)
     return api_response(
         success=False,
         message='Validation error',
@@ -237,6 +282,7 @@ class EventListCreateView(generics.ListCreateAPIView):
     search_fields = ['title', 'description', 'venue']
     ordering_fields = ['event_date', 'ticket_price', 'created_at']
     ordering = ['event_date']
+    parser_classes = [JSONParser, FormParser, MultiPartParser]
     
     def get_queryset(self):
         """
@@ -425,12 +471,13 @@ def my_registrations(request):
             many=True,
             context={'request': request}
         )
-        
-        return paginator.get_paginated_response({
+
+        paginated_response = paginator.get_paginated_response(serializer.data)
+        return Response({
             'success': True,
             'message': 'User registrations retrieved successfully',
-            'results': serializer.data
-        })
+            'data': paginated_response.data
+        }, status=paginated_response.status_code)
     
     except Exception as e:
         return api_response(
@@ -467,12 +514,13 @@ def my_events(request):
             many=True,
             context={'request': request}
         )
-        
-        return paginator.get_paginated_response({
+
+        paginated_response = paginator.get_paginated_response(serializer.data)
+        return Response({
             'success': True,
             'message': 'User events retrieved successfully',
-            'results': serializer.data
-        })
+            'data': paginated_response.data
+        }, status=paginated_response.status_code)
     
     except Exception as e:
         return api_response(
@@ -540,21 +588,20 @@ def event_registrations(request, event_id):
             registration_status='CONFIRMED'
         ).values('seats_reserved').count()
         
-        response_data = paginator.get_paginated_response({
+        paginated_response = paginator.get_paginated_response(serializer.data)
+        response_data = {
             'success': True,
             'message': 'Event registrations retrieved successfully',
-            'results': serializer.data
-        })
-        
-        # Add statistics to response
-        if isinstance(response_data.data, dict):
-            response_data.data['statistics'] = {
-                'confirmed_registrations': confirmed_count,
-                'cancelled_registrations': cancelled_count,
-                'total_seats_reserved': total_seats_reserved
-            }
-        
-        return response_data
+            'data': paginated_response.data
+        }
+
+        response_data['data']['statistics'] = {
+            'confirmed_registrations': confirmed_count,
+            'cancelled_registrations': cancelled_count,
+            'total_seats_reserved': total_seats_reserved
+        }
+
+        return Response(response_data, status=paginated_response.status_code)
     
     except Exception as e:
         return api_response(
